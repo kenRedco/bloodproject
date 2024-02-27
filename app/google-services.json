@@ -1,52 +1,27 @@
 {
   "project_info": {
-    "project_number": "168113844797",
-    "firebase_url": "https://blood-bank-database.firebaseio.com",
-    "project_id": "blood-bank-database",
-    "storage_bucket": "blood-bank-database.appspot.com"
+    "project_number": "1053977196339",
+    "firebase_url": "https://online-blood-donation-d42d3-default-rtdb.firebaseio.com",
+    "project_id": "online-blood-donation-d42d3",
+    "storage_bucket": "online-blood-donation-d42d3.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:168113844797:android:8c3c3a8c73fb8254",
+        "mobilesdk_app_id": "1:1053977196339:android:404ca33d2263125341f046",
         "android_client_info": {
-          "package_name": "com.android.iunoob.bloodbank"
+          "package_name": "com.android.donblood.bloodbank"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "168113844797-jgav0mn9ckf1j659q77r8qnbf5h4kvni.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.android.iunoob.bloodbank",
-            "certificate_hash": "dcb94ea92b95d9569b1a8d06d594593deb56f3ab"
-          }
-        },
-        {
-          "client_id": "168113844797-g45rte55k6ov36kqhv9i5ee6crggsuk9.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAX-e-7ickgMSuWrOwWRVcKaCbyTwj8yEw"
+          "current_key": "AIzaSyA3BT1mDntdyoiNcbGVTQ8QMIW0JamHf1g"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "168113844797-g45rte55k6ov36kqhv9i5ee6crggsuk9.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": []
         }
       }
     }

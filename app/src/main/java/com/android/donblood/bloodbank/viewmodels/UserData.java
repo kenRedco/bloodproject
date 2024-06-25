@@ -9,11 +9,13 @@ package com.android.donblood.bloodbank.viewmodels;
 
 public class UserData {
 
-    private String Name, Email, Contact, Address;
-    private int Gender, BloodGroup, Division;
+    private String Name, Email, Contact, Address, Gender, BloodGroup, Division;
 
     public UserData() {
-
+        // Option 1: Simulate missing data can be removed if you have actual data
+        // this.Name = "";
+        // this.Email = "";
+        // this.Contact = "";
     }
 
     public String getContact() {
@@ -32,11 +34,11 @@ public class UserData {
         this.Address = address;
     }
 
-    public int getDivision() {
+    public String getDivision() {
         return Division;
     }
 
-    public void setDivision(int division) {
+    public void setDivision(String division) {
         this.Division = division;
     }
 
@@ -44,11 +46,11 @@ public class UserData {
         return Name;
     }
 
-    public int getBloodGroup() {
+    public String getBloodGroup() {
         return BloodGroup;
     }
 
-    public void setBloodGroup(int bloodGroup) {
+    public void setBloodGroup(String bloodGroup) {
         this.BloodGroup = bloodGroup;
     }
 
@@ -56,19 +58,24 @@ public class UserData {
         return Email;
     }
 
-    public int getGender() {
+    public String getGender() {
         return Gender;
     }
 
-    public void setName(String name) { this.Name = name; }
+    public void setName(String name) {
+        this.Name = name;
+    }
 
     public void setEmail(String email) {
         this.Email = email;
     }
 
-    public void setGender(int gender) {
+    public void setGender(String gender) {
         this.Gender = gender;
     }
 
-
+    // Added method to retrieve the mobile number
+    public String getMobile() {
+        return getContact(); // Assuming mobile number is stored in the "Contact" field
+    }
 }

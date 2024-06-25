@@ -1,83 +1,70 @@
 package com.android.donblood.bloodbank.adapters;
 
 import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import com.android.donblood.bloodbank.R;
 import com.android.donblood.bloodbank.viewmodels.DonorData;
-
 import java.util.List;
-
-/***
- Project Name: BloodBank
- Project Date: 10/11/18
- Created by: imshakil
- Email: mhshakil_ice_iu@yahoo.com
- ***/
 
 public class SearchDonorAdapter extends RecyclerView.Adapter<SearchDonorAdapter.PostHolder> {
 
+    private List<DonorData> donorList;
 
-    private List<DonorData> postLists;
-
-    public class PostHolder extends RecyclerView.ViewHolder
-    {
-        TextView Name, Address, contact, posted, totaldonate;
+    public class PostHolder extends RecyclerView.ViewHolder {
+        TextView nameTextView, contactTextView, addressTextView, totalDonateTextView, lastDonateTextView;
 
         public PostHolder(@NonNull View itemView) {
             super(itemView);
-
-            Name = itemView.findViewById(R.id.donorName);
-            contact = itemView.findViewById(R.id.donorContact);
-            totaldonate = itemView.findViewById(R.id.totaldonate);
-            Address = itemView.findViewById(R.id.donorAddress);
-            posted = itemView.findViewById(R.id.lastdonate);
-
+            nameTextView = itemView.findViewById(R.id.donorName);
+            contactTextView = itemView.findViewById(R.id.donorContact);
+            addressTextView = itemView.findViewById(R.id.donorAddress);
+            totalDonateTextView = itemView.findViewById(R.id.totaldonate);
+            lastDonateTextView = itemView.findViewById(R.id.lastdonate);
         }
     }
 
-    public SearchDonorAdapter(List<DonorData> postLists)
-    {
-        this.postLists = postLists;
+    public SearchDonorAdapter(List<DonorData> donorList) {
+        this.donorList = donorList;
+    }
+
+    @NonNull
+    @Override
+    public PostHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View listItemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.search_donor_item, parent, false);
+        return new PostHolder(listItemView);
     }
 
     @Override
-    public PostHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public void onBindViewHolder(@NonNull PostHolder holder, int position) {
+        DonorData currentDonor = donorList.get(position);
 
-        View listitem = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.search_donor_item, viewGroup, false);
-
-        return new PostHolder(listitem);
-    }
-
-    @Override
-    public void onBindViewHolder(PostHolder postHolder, int i) {
-
-        if(i%2==0)
-        {
-            postHolder.itemView.setBackgroundColor(Color.parseColor("#C13F31"));
+        // Set background color based on position
+        if (position % 2 == 0) {
+            holder.itemView.setBackgroundColor(Color.parseColor("#C13F31"));
+        } else {
+            holder.itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));
         }
-        else
-        {
-            postHolder.itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));
-        }
-        DonorData donorData = postLists.get(i);
-        postHolder.Name.setText("Name: "+donorData.getName());
-        postHolder.contact.setText(donorData.getContact());
-        postHolder.Address.setText("Address: "+donorData.getAddress());
-        postHolder.totaldonate.setText("Total Donation: "+donorData.getTotalDonate()+" times");
-        postHolder.posted.setText("Last Donation: "+donorData.getLastDonate());
 
-
+        holder.nameTextView.setText("Name: " + currentDonor.getName());
+        holder.contactTextView.setText("Contact: " + currentDonor.getMobile());
+        holder.addressTextView.setText("Address: " + currentDonor.getAddress());
+        holder.totalDonateTextView.setText("Total Donation: " + currentDonor.getTotalDonate() + " times");
+        holder.lastDonateTextView.setText("Last Donation: " + currentDonor.getLastDonate());
     }
 
     @Override
     public int getItemCount() {
-        return postLists.size();
+        return donorList.size();
+    }
+
+    public void setDonorList(List<DonorData> donorList) {
+        this.donorList = donorList;
+        notifyDataSetChanged();
     }
 }

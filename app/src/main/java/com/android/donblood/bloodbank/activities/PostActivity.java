@@ -1,17 +1,17 @@
 package com.android.donblood.bloodbank.activities;
 
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.donblood.bloodbank.R;
 import com.android.donblood.bloodbank.viewmodels.UserData;
@@ -28,10 +28,10 @@ import java.util.Calendar;
 
 public class PostActivity extends AppCompatActivity {
 
-    ProgressDialog pd;
+    AlertDialog progressDialog;
 
     EditText text1, text2;
-    Spinner spinner1, spinner2;
+    // Replace Spinner with a more appropriate view (e.g., RecyclerView, ListView)
     Button btnpost;
 
     FirebaseDatabase fdb;
@@ -47,10 +47,11 @@ public class PostActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
 
-        pd = new ProgressDialog(this);
-        pd.setMessage("Loading...");
-        pd.setCancelable(true);
-        pd.setCanceledOnTouchOutside(false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Loading...")
+                .setMessage("Please wait...")
+                .setCancelable(false);
+        progressDialog = builder.create();
 
         getSupportActionBar().setTitle("Post Blood Request");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -58,8 +59,7 @@ public class PostActivity extends AppCompatActivity {
         text1 = findViewById(R.id.getMobile);
         text2 = findViewById(R.id.getLocation);
 
-        spinner1 = findViewById(R.id.SpinnerBlood);
-        spinner2 = findViewById(R.id.SpinnerDivision);
+        // Replace Spinner with a more appropriate view (e.g., RecyclerView, ListView)
 
         btnpost = findViewById(R.id.postbtn);
 
@@ -70,36 +70,33 @@ public class PostActivity extends AppCompatActivity {
         int year = cal.get(Calendar.YEAR);
         int hour = cal.get(Calendar.HOUR);
         int min = cal.get(Calendar.MINUTE);
-        month+=1;
+        month += 1;
         Time = "";
         Date = "";
-        String ampm="AM";
+        String ampm = "AM";
 
-        if(cal.get(Calendar.AM_PM) ==1)
-        {
+        if (cal.get(Calendar.AM_PM) == 1) {
             ampm = "PM";
         }
 
-        if(hour<10)
-        {
+        if (hour < 10) {
             Time += "0";
         }
         Time += hour;
-        Time +=":";
+        Time += ":";
 
-        if(min<10) {
+        if (min < 10) {
             Time += "0";
         }
 
-        Time +=min;
-        Time +=(" "+ampm);
+        Time += min;
+        Time += (" " + ampm);
 
-        Date = day+"/"+month+"/"+year;
+        Date = day + "/" + month + "/" + year;
 
-        FirebaseUser cur_user = mAuth.getInstance().getCurrentUser();
+        FirebaseUser cur_user = FirebaseAuth.getInstance().getCurrentUser();
 
-        if(cur_user == null)
-        {
+        if (cur_user == null) {
             startActivity(new Intent(PostActivity.this, LoginActivity.class));
         } else {
             uid = cur_user.getUid();
@@ -113,59 +110,49 @@ public class PostActivity extends AppCompatActivity {
             btnpost.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    pd.show();
-                    final Query findname = fdb.getReference("users").child(uid);
+                    progressDialog.show();
+                    final Query findUserData = fdb.getReference("users").child(uid);
 
-                    if(text1.getText().length() == 0)
-                    {
+                    if (text1.getText().length() == 0) {
                         Toast.makeText(getApplicationContext(), "Enter your contact number!",
                                 Toast.LENGTH_LONG).show();
-                    }
-                    else if(text2.getText().length() == 0)
-                    {
+                    } else if (text2.getText().length() == 0) {
                         Toast.makeText(getApplicationContext(), "Enter your location!",
                                 Toast.LENGTH_LONG).show();
-                    }
-                    else {
-                        findname.addListenerForSingleValueEvent(new ValueEventListener() {
+                    } else {
+                        findUserData.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
                                 if (dataSnapshot.exists()) {
-                                    db_ref.child(uid).child("Name").setValue(dataSnapshot.getValue(UserData.class).getName());
+                                    UserData userData = dataSnapshot.getValue(UserData.class);
+                                    db_ref.child(uid).child("Name").setValue(userData.getName());
                                     db_ref.child(uid).child("Contact").setValue(text1.getText().toString());
                                     db_ref.child(uid).child("Address").setValue(text2.getText().toString());
-                                    db_ref.child(uid).child("Division").setValue(spinner2.getSelectedItem().toString());
-                                    db_ref.child(uid).child("BloodGroup").setValue(spinner1.getSelectedItem().toString());
+                                    db_ref.child(uid).child("BloodGroup").setValue(userData.getBloodGroup());
+                                    db_ref.child(uid).child("Division").setValue(userData.getDivision());
                                     db_ref.child(uid).child("Time").setValue(Time);
                                     db_ref.child(uid).child("Date").setValue(Date);
                                     Toast.makeText(PostActivity.this, "Your post has been created successfully",
                                             Toast.LENGTH_LONG).show();
                                     startActivity(new Intent(PostActivity.this, Dashboard.class));
-
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "Database error occured.",
+                                    Toast.makeText(getApplicationContext(), "Database error occurred.",
                                             Toast.LENGTH_LONG).show();
                                 }
-
                             }
 
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) {
                                 Log.d("User", databaseError.getMessage());
-
                             }
                         });
                     }
                 }
             });
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        pd.dismiss();
-
+        progressDialog.dismiss();
     }
 
     @Override

@@ -2,8 +2,8 @@ package com.android.donblood.bloodbank.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -77,7 +77,6 @@ public class ProfileActivity extends AppCompatActivity {
             retypePassword.setVisibility(View.GONE);
             btnSignup.setText("Update Profile");
             pd.dismiss();
-           /// getActionBar().setTitle("Profile");
             getSupportActionBar().setTitle("Profile");
             findViewById(R.id.image_logo).setVisibility(View.GONE);
             isUpdate = true;
@@ -93,13 +92,15 @@ public class ProfileActivity extends AppCompatActivity {
                     if (userData != null) {
                         pd.show();
                         fullName.setText(userData.getName());
-                        gender.setSelection(userData.getGender());
+                        gender.setSelection(getIndex(gender, userData.getGender()));
                         address.setText(userData.getAddress());
-                        contact.setText(userData.getContact());
-                        bloodgroup.setSelection(userData.getBloodGroup());
-                        division.setSelection(userData.getDivision());
-                        Query donor = donor_ref.child(division.getSelectedItem().toString())
-                                .child(bloodgroup.getSelectedItem().toString())
+                        contact.setText(userData.getMobile());
+                        bloodgroup.setSelection(getIndex(bloodgroup, userData.getBloodGroup()));
+                        division.setSelection(getIndex(division, userData.getDivision()));
+                        String divisionValue = division.getSelectedItem().toString();
+                        String bloodGroupValue = bloodgroup.getSelectedItem().toString();
+                        Query donor = donor_ref.child(divisionValue)
+                                .child(bloodGroupValue)
                                 .child(mAuth.getCurrentUser().getUid());
 
                         donor.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -146,13 +147,11 @@ public class ProfileActivity extends AppCompatActivity {
                 final String password = inputpassword.getText().toString();
                 final String ConfirmPassword = retypePassword.getText().toString();
                 final String Name = fullName.getText().toString();
-                final int Gender = gender.getSelectedItemPosition();
+                final String genderValue = gender.getSelectedItem().toString();
                 final String Contact = contact.getText().toString();
-                final int BloodGroup = bloodgroup.getSelectedItemPosition();
+                final String bloodGroupValue = bloodgroup.getSelectedItem().toString();
                 final String Address = address.getText().toString();
-                final int Division = division.getSelectedItemPosition();
-                final String blood = bloodgroup.getSelectedItem().toString();
-                final String div   = division.getSelectedItem().toString();
+                final String divisionValue = division.getSelectedItem().toString();
 
                 try {
 
@@ -190,23 +189,24 @@ public class ProfileActivity extends AppCompatActivity {
                                                     Log.v("error", task.getException().getMessage());
                                                 } else {
                                                     String id = mAuth.getCurrentUser().getUid();
-                                                    db_ref.child(id).child("Name").setValue(Name);
-                                                    db_ref.child(id).child("Gender").setValue(Gender);
-                                                    db_ref.child(id).child("Contact").setValue(Contact);
-                                                    db_ref.child(id).child("BloodGroup").setValue(BloodGroup);
-                                                    db_ref.child(id).child("Address").setValue(Address);
-                                                    db_ref.child(id).child("Division").setValue(Division);
+                                                    db_ref.child(id).child("name").setValue(Name);
+                                                    db_ref.child(id).child("gender").setValue(genderValue);
+                                                    db_ref.child(id).child("mobile").setValue(Contact);
+                                                    db_ref.child(id).child("bloodGroup").setValue(bloodGroupValue);
+                                                    db_ref.child(id).child("address").setValue(Address);
+                                                    db_ref.child(id).child("division").setValue(divisionValue);
 
                                                     if(isDonor.isChecked())
                                                     {
-                                                        donor_ref.child(div).child(blood).child(id).child("UID").setValue(id).toString();
-                                                        donor_ref.child(div).child(blood).child(id).child("LastDonate").setValue("Don't donate yet!");
-                                                        donor_ref.child(div).child(blood).child(id).child("TotalDonate").setValue(0);
-                                                        donor_ref.child(div).child(blood).child(id).child("Name").setValue(Name);
-                                                        donor_ref.child(div).child(blood).child(id).child("Contact").setValue(Contact);
-                                                        donor_ref.child(div).child(blood).child(id).child("Address").setValue(Address);
+                                                        donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("uid").setValue(id);
+                                                        donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("lastDonate").setValue("Don't donate yet!");
+                                                        donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("totalDonate").setValue(0);
+                                                        donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("name").setValue(Name);
+                                                        donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("mobile").setValue(Contact);
+                                                        donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("address").setValue(Address);
 
                                                     }
+
 
                                                     Toast.makeText(getApplicationContext(), "Welcome, your account has been created!", Toast.LENGTH_LONG)
                                                             .show();
@@ -225,27 +225,27 @@ public class ProfileActivity extends AppCompatActivity {
                         } else {
 
                             String id = mAuth.getCurrentUser().getUid();
-                            db_ref.child(id).child("Name").setValue(Name);
-                            db_ref.child(id).child("Gender").setValue(Gender);
-                            db_ref.child(id).child("Contact").setValue(Contact);
-                            db_ref.child(id).child("BloodGroup").setValue(BloodGroup);
-                            db_ref.child(id).child("Address").setValue(Address);
-                            db_ref.child(id).child("Division").setValue(Division);
+                            db_ref.child(id).child("name").setValue(Name);
+                            db_ref.child(id).child("gender").setValue(genderValue);
+                            db_ref.child(id).child("mobile").setValue(Contact);
+                            db_ref.child(id).child("bloodGroup").setValue(bloodGroupValue);
+                            db_ref.child(id).child("address").setValue(Address);
+                            db_ref.child(id).child("division").setValue(divisionValue);
 
                             if(isDonor.isChecked())
                             {
-                                donor_ref.child(div).child(blood).child(id).child("UID").setValue(id).toString();
-                                donor_ref.child(div).child(blood).child(id).child("LastDonate").setValue("Don't donate yet!");
-                                donor_ref.child(div).child(blood).child(id).child("TotalDonate").setValue(0);
-                                donor_ref.child(div).child(blood).child(id).child("Name").setValue(Name);
-                                donor_ref.child(div).child(blood).child(id).child("Contact").setValue(Contact);
-                                donor_ref.child(div).child(blood).child(id).child("Address").setValue(Address);
+                                donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("uid").setValue(id);
+                                donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("lastDonate").setValue("Don't donate yet!");
+                                donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("totalDonate").setValue(0);
+                                donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("name").setValue(Name);
+                                donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("mobile").setValue(Contact);
+                                donor_ref.child(divisionValue).child(bloodGroupValue).child(id).child("address").setValue(Address);
 
                             }
                             else
                             {
 
-                                donor_ref.child(div).child(blood).child(id).removeValue();
+                                donor_ref.child(divisionValue).child(bloodGroupValue).child(id).removeValue();
 
                             }
                             Toast.makeText(getApplicationContext(), "Your account has been updated!", Toast.LENGTH_LONG)
@@ -263,6 +263,15 @@ public class ProfileActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private int getIndex(Spinner spinner, String value) {
+        for (int i = 0; i < spinner.getCount(); i++) {
+            if (spinner.getItemAtPosition(i).toString().equalsIgnoreCase(value)) {
+                return i;
+            }
+        }
+        return 0; // Return the default index if the value is not found
     }
 
     private void ShowError(String error) {

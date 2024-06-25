@@ -1,29 +1,20 @@
 package com.android.donblood.bloodbank.viewmodels;
 
-/***
- Project Name: BloodBank
- Project Date: 10/17/18
- Created by: imshakil
- Email: mhshakil_ice_iu@yahoo.com
- ***/
-
 public class DonorData {
-
     private int TotalDonate;
-    private String LastDonate, Name, Contact, UID, Address;
-
+    private String LastDonate, Name, Mobile, UID, Address;
 
     public DonorData() {
-
+        // Default constructor
     }
 
-    public DonorData(int totalDonate, String lastDonate, String Name, String Contact, String Address, String UID) {
+    public DonorData(int totalDonate, String lastDonate, String name, String mobile, String address, String UID) {
         this.TotalDonate = totalDonate;
         this.LastDonate = lastDonate;
-        this.Name = Name;
-        this.Contact = Contact;
+        this.Name = name;
+        this.Mobile = mobile;
+        this.Address = address;
         this.UID = UID;
-        this.Address = Address;
     }
 
     public int getTotalDonate() {
@@ -54,16 +45,16 @@ public class DonorData {
         return Name;
     }
 
-    public void setDonorName(String donorName) {
-        this.Name = Name;
+    public void setName(String name) {
+        this.Name = name;
     }
 
-    public String getContact() {
-        return Contact;
+    public String getMobile() {
+        return Mobile;
     }
 
-    public void setContact(String donorContact) {
-        this.Contact = Contact;
+    public void setMobile(String mobile) {
+        this.Mobile = mobile;
     }
 
     public String getAddress() {
@@ -71,6 +62,6 @@ public class DonorData {
     }
 
     public void setAddress(String address) {
-        Address = address;
+        this.Address = address;
     }
 }

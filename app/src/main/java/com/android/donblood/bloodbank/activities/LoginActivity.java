@@ -1,15 +1,16 @@
 package com.android.donblood.bloodbank.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.donblood.bloodbank.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -22,27 +23,26 @@ public class LoginActivity extends AppCompatActivity {
     private Button signin, signup, resetpass;
     private EditText inputemail, inputpassword;
     private FirebaseAuth mAuth;
-    private ProgressDialog pd;
+    private AlertDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        pd = new ProgressDialog(this);
-        pd.setMessage("Loading...");
-        pd.setCancelable(true);
-        pd.setCanceledOnTouchOutside(false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Loading...")
+                .setMessage("Please wait...")
+                .setCancelable(false);
+        progressDialog = builder.create();
 
         mAuth = FirebaseAuth.getInstance();
 
-        if(mAuth.getCurrentUser() != null)
-        {
+        if (mAuth.getCurrentUser() != null) {
             Intent intent = new Intent(getApplicationContext(), Dashboard.class);
             startActivity(intent);
             finish();
         }
-
 
         inputemail = findViewById(R.id.input_username);
         inputpassword = findViewById(R.id.input_password);
@@ -55,12 +55,12 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                final String email = inputemail.getText().toString()+"";
-                final String password = inputpassword.getText().toString()+"";
+                final String email = inputemail.getText().toString() + "";
+                final String password = inputpassword.getText().toString() + "";
 
                 try {
-                    if(password.length()>0 && email.length()>0) {
-                        pd.show();
+                    if (password.length() > 0 && email.length() > 0) {
+                        progressDialog.show();
                         mAuth.signInWithEmailAndPassword(email, password)
                                 .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                                     @Override
@@ -75,17 +75,14 @@ public class LoginActivity extends AppCompatActivity {
                                             startActivity(intent);
                                             finish();
                                         }
-                                        pd.dismiss();
+                                        progressDialog.dismiss();
                                     }
                                 });
-                    }
-                    else
-                    {
-                        Toast.makeText(getApplicationContext(), "Please fill all the field.", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Please fill all the fields.", Toast.LENGTH_LONG).show();
                     }
 
-                } catch (Exception e)
-                {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -106,8 +103,5 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-
     }
-
 }

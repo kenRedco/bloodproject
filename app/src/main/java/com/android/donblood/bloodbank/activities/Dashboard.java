@@ -1,22 +1,20 @@
 package com.android.donblood.bloodbank.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.android.donblood.bloodbank.R;
 import com.android.donblood.bloodbank.fragments.AboutUs;
@@ -26,38 +24,52 @@ import com.android.donblood.bloodbank.fragments.HomeView;
 import com.android.donblood.bloodbank.fragments.NearByHospitalActivity;
 import com.android.donblood.bloodbank.fragments.SearchDonorFragment;
 import com.android.donblood.bloodbank.viewmodels.UserData;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import static com.android.donblood.bloodbank.R.id.home;
 
 public class Dashboard extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseAuth mAuth;
+    private TextView bloodGroupTextView;
+    private TextView genderTextView;
+    private TextView mobileTextView;
+    private TextView addressTextView;
+    private TextView divisionTextView;
     private TextView getUserName;
     private TextView getUserEmail;
     private FirebaseDatabase user_db;
     private FirebaseUser cur_user;
     private DatabaseReference userdb_ref;
 
-    private ProgressDialog pd;
+    private AlertDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        pd = new ProgressDialog(this);
-        pd.setMessage("Loading...");
-        pd.setCancelable(true);
-        pd.setCanceledOnTouchOutside(false);
+        // Initialize TextViews
+        bloodGroupTextView = findViewById(R.id.blood_group_text_view);
+        genderTextView = findViewById(R.id.gender_text_view);
+        mobileTextView = findViewById(R.id.mobile_text_view);
+        addressTextView = findViewById(R.id.address_text_view);
+        divisionTextView = findViewById(R.id.division_text_view);
+        getUserName = findViewById(R.id.UserNameView);
+        getUserEmail = findViewById(R.id.UserEmailView);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Loading...")
+                .setMessage("Please wait...")
+                .setCancelable(false);
+        progressDialog = builder.create();
 
         mAuth = FirebaseAuth.getInstance();
         user_db = FirebaseDatabase.getInstance();
@@ -66,10 +78,10 @@ public class Dashboard extends AppCompatActivity
 
         getUserEmail = findViewById(R.id.UserEmailView);
         getUserName = findViewById(R.id.UserNameView);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -77,55 +89,88 @@ public class Dashboard extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View header = navigationView.getHeaderView(0);
 
-        getUserEmail = (TextView) header.findViewById(R.id.UserEmailView);
-        getUserName = (TextView) header.findViewById(R.id.UserNameView);
+        getUserEmail = header.findViewById(R.id.UserEmailView);
+        getUserName = header.findViewById(R.id.UserNameView);
 
-        Query singleuser = userdb_ref.child(cur_user.getUid());
-        pd.show();
+        progressDialog.show();
+        fetchUserData();
+
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentcontainer, new HomeView()).commit();
+            navigationView.getMenu().getItem(0).setChecked(true);
+        }
+    }
+
+    private void fetchUserData() {
+        DatabaseReference singleuser = userdb_ref.child(cur_user.getUid());
         singleuser.addListenerForSingleValueEvent(new ValueEventListener() {
-
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //pd.show();
-                String name = dataSnapshot.getValue(UserData.class).getName();
+                if (dataSnapshot.exists()) {
+                    UserData userData = dataSnapshot.getValue(UserData.class);
+                    if (userData != null) {
+                        String name = userData.getName();
+                        String email = userData.getEmail();
+                        String bloodGroup = userData.getBloodGroup();
+                        String mobile = userData.getMobile();
+                        String address = userData.getAddress();
+                        String division = userData.getDivision();
+                        String gender = userData.getGender();
 
-                getUserName.setText(name);
-                getUserEmail.setText(cur_user.getEmail());
+                        // Update the UI with the retrieved data
+                        getUserName.setText(name);
+                        getUserEmail.setText(email);
+                        bloodGroupTextView.setText(bloodGroup);
+                        genderTextView.setText(gender);
+                        mobileTextView.setText(mobile);
+                        addressTextView.setText(address);
+                        divisionTextView.setText(division);
+                    } else {
+                        Log.e("Dashboard", "UserData object is null");
+                    }
+                } else {
+                    Log.e("Dashboard", "DataSnapshot is null");
+                    showDatabaseEmptyMessage();
+                }
 
-                pd.dismiss();
+                if (cur_user != null) {
+                    getUserEmail.setText(cur_user.getEmail());
+                } else {
+                    Log.e("Dashboard", "Current user is null");
+                }
+
+                progressDialog.dismiss();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.d("User", databaseError.getMessage());
-
+                progressDialog.dismiss();
             }
         });
-
-
-        if(savedInstanceState == null)
-        {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentcontainer, new HomeView()).commit();
-            navigationView.getMenu().getItem(0).setChecked(true);
-
-        }
-
     }
 
+    private void showDatabaseEmptyMessage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Database Empty")
+                .setMessage("The database is empty for this user!")
+                .setPositiveButton("OK", null)
+                .show();
+    }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -135,16 +180,12 @@ public class Dashboard extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.dashboard, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.donateinfo) {
@@ -160,27 +201,23 @@ public class Dashboard extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == home) {
+        if (id == R.id.home) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentcontainer, new HomeView()).commit();
 
         } else if (id == R.id.userprofile) {
             startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
 
-        }
-        else if (id == R.id.user_achiev) {
+        } else if (id == R.id.user_achiev) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentcontainer, new AchievmentsView()).commit();
 
-        }
-        else if (id == R.id.logout) {
+        } else if (id == R.id.logout) {
             mAuth.signOut();
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
-        }
-        else if (id == R.id.blood_storage){
-
+            finish();
+        } else if (id == R.id.blood_storage) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentcontainer, new SearchDonorFragment()).commit();
 
         } else if (id == R.id.nearby_hospital) {
@@ -188,7 +225,7 @@ public class Dashboard extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -197,8 +234,7 @@ public class Dashboard extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser == null)
-        {
+        if (currentUser == null) {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
             finish();
@@ -209,12 +245,10 @@ public class Dashboard extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser == null)
-        {
+        if (currentUser == null) {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
             finish();
         }
     }
-
 }
